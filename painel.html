@@ -67,7 +67,7 @@
             container.innerHTML = "<p>Carregando...</p>";
 
             try {
-                let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
+                let query = _supabase.from("agendamentos_lavajato").select("*").order("horario", { ascending: true });
                 if (dataFiltro) query = query.eq("data", dataFiltro);
 
                 const { data, error } = await query;
