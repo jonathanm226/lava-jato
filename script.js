@@ -2,7 +2,7 @@
 const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const _supabase = supabase.Client ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let selectedBarber = "Equipe 1";
 let selectedServices = []; 
@@ -74,9 +74,9 @@ function getTimesForDate(dateString) {
 
     let horarios = [];
 
-    if (diaSemana === 0) { // Domingo fechado ou reduzido
+    if (diaSemana === 0) { 
         return [];
-    } else { // Segunda a Sábado (08:00 às 18:00)
+    } else { 
         for (let h = 8; h < 18; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
             horarios.push(h < 10 ? `0${h}:30` : `${h}:30`);
@@ -128,7 +128,7 @@ async function checkAvailableTimes() {
 
     try {
         const { data: agendamentos, error: errAgendamentos } = await _supabase
-            .from("agendamentos")
+            .from("agendamentos_lavajato")
             .select("horario, status, servico")
             .eq("barbeiro", selectedBarber)
             .eq("data", selectedDate);
@@ -183,7 +183,7 @@ async function buscarClientePorTelefone() {
 
     try {
         const { data, error } = await _supabase
-            .from("agendamentos")
+            .from("agendamentos_lavajato")
             .select("cliente, telefone, carro");
 
         if (error) throw error;
@@ -275,19 +275,19 @@ async function confirmarEEnviar() {
     }).join(", ");
 
     const formattedDate = date.split("-").reverse().join("/");
-    const whatsappNumber = "5531994951564"; // Substitua pelo número do WhatsApp do Lava Jato
+    const whatsappNumber = "5531994951564"; 
 
     const message = `✅ *AGENDAMENTO DE LAVAGEM* ✅\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n🚗 *Veículo:* ${car}\n🧼 *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n📅 *Data:* ${formattedDate}\n⏰ *Horário:* ${time}`;
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
     try {
-        await _supabase.from("agendamentos").insert([
+        await _supabase.from("agendamentos_lavajato").insert([
             {
                 cliente: name,
                 telefone: phone,
                 carro: car,
-                barbeiro: selectedBarber, // Reaproveitado como o atendente/box responsável
+                barbeiro: selectedBarber,
                 servico: listaNomesServicos,
                 preco_total: precoTotal,
                 data: date,
