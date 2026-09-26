@@ -298,7 +298,7 @@ async function confirmarEEnviar() {
 
         if (error) {
             console.error("Erro ao gravar no Supabase:", error);
-            alert("Houve um erro ao salvar no banco de dados, mas o WhatsApp será aberto.");
+            alert("Erro ao salvar: " + error.message);
         }
     } catch (err) {
         console.error("Erro na requisição:", err);
