@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lava Jato Express | Painel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-container" style="max-width: 900px;">
+        <header class="barber-header">
+            <h1>Painel de Controle</h1>
+            <p>Gerenciamento de Lavagens</p>
+        </header>
+
+        <section id="login-section" class="section">
+            <h2>Login do Administrador</h2>
+            <div class="datetime-inputs">
+                <div class="input-group">
+                    <label for="login-senha">Senha:</label>
+                    <input type="password" id="login-senha" placeholder="Senha de acesso">
+                </div>
+                <button class="btn-primary-action" onclick="fazerLogin()">Entrar</button>
+            </div>
+        </section>
+
+        <section id="dashboard-admin" class="section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Agendamentos do Dia</h2>
+                <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="width: auto; padding: 8px 15px;">Atualizar</button>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label for="filter-date">Filtrar por Data:</label>
+                <input type="date" id="filter-date" onchange="carregarAgendamentos()">
+            </div>
+
+            <div id="agendamentos-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Lista carregada via JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function fazerLogin() {
+            const senha = document.getElementById("login-senha").value;
+            if (senha === "admin123") {
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("dashboard-admin").style.display = "block";
+                document.getElementById("filter-date").value = new Date().toISOString().split("T")[0];
+                carregarAgendamentos();
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
+        async function carregarAgendamentos() {
+            const dataFiltro = document.getElementById("filter-date").value;
+            const container = document.getElementById("agendamentos-list");
+            container.innerHTML = "<p>Carregando...</p>";
+
+            try {
+                let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
+                if (dataFiltro) query = query.eq("data", dataFiltro);
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    container.innerHTML = "<p>Nenhum agendamento encontrado para esta data.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                data.forEach(item => {
+                    const card = document.createElement("div");
+                    card.style.background = "#FFFFFF";
+                    card.style.padding = "15px";
+                    card.style.borderRadius = "8px";
+                    card.style.border = "1px solid #EAEAEA";
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <strong>Horário: ${item.horario}</strong>
+                            <span style="color: #25D366; font-weight: bold;">R$ ${item.preco_total || 0},00</span>
+                        </div>
+                        <p><strong>Cliente:</strong> ${item.cliente} (${item.telefone})</p>
+                        <p><strong>Veículo:</strong> ${item.carro || 'Não informado'}</p>
+                        <p><strong>Serviços:</strong> ${item.servico}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                container.innerHTML = "<p>Erro ao carregar dados.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

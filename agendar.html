@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lava Jato Express | Agendamento</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <header class="barber-header">
+            <div class="brand-info">
+                <div class="brand-logo-container" style="width: 50px; height: 50px; margin-bottom: 0;">
+                    <i class="fa-solid fa-car-wash" style="font-size: 1.3rem; color: #000;"></i>
+                </div>
+                <div>
+                    <h1>Lava Jato Express</h1>
+                    <p>Agendamento Online</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. Profissional / Atendente -->
+        <section class="section">
+            <h2>1. Escolha o Profissional</h2>
+            <div class="barbers-grid">
+                <div class="barber-card active" onclick="selectBarber(this, 'Equipe 1')">
+                    <h3>Equipe 1</h3>
+                </div>
+                <div class="barber-card" onclick="selectBarber(this, 'Equipe 2')">
+                    <h3>Equipe 2</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Serviços de Lavagem -->
+        <section class="section">
+            <h2>2. Escolha os Serviços</h2>
+            <div class="services-grid">
+                
+                <div class="service-card" onclick="toggleService(this, 'Lavagem Simples', 40)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Lavagem Simples (40 min)</h3></div>
+                    <span class="price">R$ 40,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Lavagem Completa', 60)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Lavagem Completa (60 min)</h3></div>
+                    <span class="price">R$ 70,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Ducha', 25)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Ducha (20 min)</h3></div>
+                    <span class="price">R$ 25,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Aspiração', 30)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Aspiração (30 min)</h3></div>
+                    <span class="price">R$ 30,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Higienização de Bancos', 150)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Higienização de Bancos (120 min)</h3></div>
+                    <span class="price">R$ 150,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Polimento de Faróis', 60)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Polimento de Faróis (40 min)</h3></div>
+                    <span class="price">R$ 60,00</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. Data e Horário -->
+        <section class="section">
+            <h2>3. Data e Horário</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group" style="width: 100%;">
+                    <label for="date">Data:</label>
+                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; box-sizing: border-box;">
+                </div>
+                <div class="input-group" style="width: 100%;">
+                    <label for="time">Horário:</label>
+                    <select id="time" style="width: 100%; box-sizing: border-box;">
+                        <!-- Horários carregados via script.js -->
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Dados do Cliente (Nome, Telefone e Modelo do Carro) -->
+        <section class="section">
+            <h2>4. Seus Dados e Veículo</h2>
+            <div class="client-inputs">
+                <div class="input-group">
+                    <label for="client-phone">WhatsApp / Telefone:</label>
+                    <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required onblur="buscarClientePorTelefone()">
+                </div>
+
+                <div class="input-group">
+                    <label for="client-name">Nome Completo:</label>
+                    <input type="text" id="client-name" placeholder="Seu Nome Completo" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="car-model">Modelo do Carro / Placa:</label>
+                    <input type="text" id="car-model" placeholder="Ex: Fiat Palio Branco - ABC-1234" required>
+                </div>
+            </div>
+        </section>
+
+        <div style="height: 100px; width: 100%;"></div>
+
+        <footer class="footer-action">
+            <button class="btn-whatsapp" id="btn-continuar" onclick="abrirModalConfirmacao()">
+                Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="modal-confirmacao" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: #000;">Confirmar Agendamento</h3>
+            
+            <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6;">
+            </div>
+            
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <button onclick="confirmarEEnviar()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer; font-size: 1rem;">
+                    <i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar
+                </button>
+                <button onclick="fecharModalConfirmacao()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: 1px solid #CCC; background: #FFF; color: #333; cursor: pointer; font-size: 1rem;">
+                    Voltar e Editar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
