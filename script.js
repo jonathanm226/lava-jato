@@ -282,7 +282,7 @@ async function confirmarEEnviar() {
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
     try {
-        await _supabase.from("agendamentos_lavajato").insert([
+        const { error } = await _supabase.from("agendamentos_lavajato").insert([
             {
                 cliente: name,
                 telefone: phone,
@@ -295,8 +295,13 @@ async function confirmarEEnviar() {
                 status: 'ativo'
             }
         ]);
+
+        if (error) {
+            console.error("Erro ao gravar no Supabase:", error);
+            alert("Houve um erro ao salvar no banco de dados, mas o WhatsApp será aberto.");
+        }
     } catch (err) {
-        console.error("Erro ao salvar no Supabase:", err);
+        console.error("Erro na requisição:", err);
     }
 
     window.location.href = link;
